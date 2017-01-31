@@ -15,7 +15,7 @@ System.Collections.Hashtable. Get-Config return hash bank of items: [section][it
 function Get-Config {
 	[CmdletBinding()]
 	param(
-		[parameter(Mandatory = $true, ValueFromPipeline)]
+		[parameter(Mandatory = $true, valueFromPipeline = $true)]
 		[string]$path,
 
 		[Parameter()]
@@ -53,5 +53,42 @@ function Get-Config {
 			}
 		}
 		return $hash;
+	}
+}
+
+<#
+.SYNOPSIS
+Convert psobject to hashtable
+.DESCRIPTION
+Convert attributes psobject to hashtable, wher name -> key; value -> Item(key)
+.PARAMETER psobject
+Powershell object
+.INPUTS
+You can pipe psobject to cmdlet
+.OUTPUTS
+System.Collections.Hashtable.
+#>
+function ConvertFrom-PSObjectToHashtable {
+	[CmdletBinding()]
+	param(
+		[Parameter(mandatory = $true, valueFromPipeline = $true)]
+		[AllowNull()]
+		[System.Object]$psobject
+	)
+
+	process {
+		switch ($psobject) {
+			$null { 
+				return $null;
+			}
+			Default {
+				$hashtable = @{};
+				$psobject.psobject.properties | 
+				ForEach-Object -Process {
+					$hashtable[$_.Name] = $_.Value;
+				}
+				return $hashtable;
+			}
+		}
 	}
 }
